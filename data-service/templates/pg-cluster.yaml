@@ -1,0 +1,36 @@
+apiVersion: postgres-operator.crunchydata.com/v1beta1
+kind: PostgresCluster
+metadata:
+  name: data-service
+spec:
+  postgresVersion: 16
+  databaseInitSQL:
+    key: init.sql
+    name: init-sql-data  
+  instances:
+    - name: instance1
+      dataVolumeClaimSpec:
+        accessModes:
+        - "ReadWriteOnce"
+        resources:
+          requests:
+            storage: 25Gi
+  backups:
+    pgbackrest:
+      repos:
+      - name: repo1
+        volume:
+          volumeClaimSpec:
+            accessModes:
+            - "ReadWriteOnce"
+            resources:
+              requests:
+                storage: 5Gi
+  patroni:
+    dynamicConfiguration:
+      postgresql:
+        pg_hba:
+          - "hostssl postgres data-service 0.0.0.0/0 md5"  # Allow SSL connection to the 'postgres' DB
+          - "host postgres data-service 0.0.0.0/0 md5"
+          - "hostssl data-service data-service 0.0.0.0/0 md5"  # Allow SSL connection to the 'postgres' DB
+          - "host data-service data-service 0.0.0.0/0 md5"

@@ -1,0 +1,29 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDatasource
+metadata:
+  name: {{ .Values.grafana.matomoDataSource.name }}
+spec:
+  datasource:
+    name: {{ .Values.grafana.matomoDataSource.name }}
+    type: "yesoreyeram-infinity-datasource"
+    uid: {{ .Values.grafana.matomoDataSource.uid }}
+    url: "https://analytics.{{ $.Values.baseUrl }}"
+    basicAuth: false
+    basicAuthUser: "user"
+    isDefault: false
+    access: proxy
+    jsonData:
+      allowedHosts: []
+      auth_method: "none"
+      customHealthCheckEnabled: false
+      customHealthCheckUrl: "/index.php?module=Login"
+      global_queries: []
+      oauthPassThru: false
+      pathEncodedUrlsEnabled: false
+      refData: []
+  instanceSelector:
+    matchLabels:
+      dashboards: "grafana"
+  plugins:
+    - name: yesoreyeram-infinity-datasource
+      version: 2.11.4

@@ -1,0 +1,34 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Connector
+metadata:
+  name: userservice-source-connector
+spec:
+  class: io.debezium.connector.postgresql.PostgresConnector
+  configs:
+    database.dbname: "${file:/mnt/secrets/userservice-secret/userservice.properties:dbname}"
+    database.hostname: "${file:/mnt/secrets/userservice-secret/userservice.properties:hostname}"
+    database.password: "${file:/mnt/secrets/userservice-secret/userservice.properties:password}"
+    database.user: "${file:/mnt/secrets/userservice-secret/userservice.properties:user}"
+    plugin.name: pgoutput
+    publication.autocreate.mode: filtered
+    slot.name: userservice_db_slot
+    table.include.list: userservice.*
+    schema.include.list: userservice
+    topic.prefix: userservice{{ .Values.appSuffix }}
+    topic.creation.enable: "true"
+    topic.creation.default.replication.factor: "3"
+    topic.creation.default.partitions: "10"  
+    topic.creation.default.cleanup.policy: "compact"
+    topic.creation.default.compression.type: "lz4"
+    value.converter: "org.apache.kafka.connect.json.JsonConverter"
+    value.converter.schemas.enable: "true"  
+    key.converter: "org.apache.kafka.connect.json.JsonConverter"
+    key.converter.schemas.enable: "true"
+    transforms: "unwrap"
+    transforms.unwrap.type: "io.debezium.transforms.ExtractNewRecordState"
+    transforms.unwrap.add.fields: "op,table,lsn,source.ts_ms"
+    transforms.unwrap.add.headers: db
+    transforms.unwrap.delete.handling.mode: rewrite          
+  connectClusterRef:
+    name: connect
+  taskMax: 1

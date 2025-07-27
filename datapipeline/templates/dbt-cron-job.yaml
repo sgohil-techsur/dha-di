@@ -1,0 +1,78 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: dbt-cronjob
+spec:
+  schedule: "0 */12 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: dbt-job
+            image: {{ .Values.registryURL}}/datapipeline:latest
+            env:
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: data-service-pguser-data-service
+                  key: host
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: data-service-pguser-data-service
+                  key: user
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: data-service-pguser-data-service
+                  key: password
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: data-service-pguser-data-service
+                  key: dbname            
+            volumeMounts:
+            - name: profiles-volume
+              mountPath: /root/.dbt/profiles.yml
+              subPath: profiles.yml
+            command: ["dbt", "run"]
+          initContainers:
+          - name: dbt-seed
+            image: {{ .Values.registryURL}}/datapipeline:latest
+            env:
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: data-service-pguser-data-service
+                  key: host
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: data-service-pguser-data-service
+                  key: user
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: data-service-pguser-data-service
+                  key: password
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: data-service-pguser-data-service
+                  key: dbname            
+            volumeMounts:
+            - name: profiles-volume
+              mountPath: /root/.dbt/profiles.yml
+              subPath: profiles.yml
+            command: ["dbt", "seed", "--full-refresh"]            
+          volumes:
+          - name: profiles-volume
+            configMap:
+              name: dbt-profiles
+          restartPolicy: Never
+      backoffLimit: 1

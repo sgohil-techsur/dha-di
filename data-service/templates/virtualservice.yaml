@@ -1,0 +1,15 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ $.Values.serviceName }}-virtualservice
+spec:
+  hosts:
+  - "{{ $.Values.appName }}{{ if $.Values.appSuffix }}-{{ $.Values.appSuffix }}{{ end }}.{{ $.Values.baseUrl }}"
+  gateways:
+  - infrastructure/istio-gateway
+  http:
+  - route:
+    - destination:
+        port:
+          number: {{ $.Values.servicePort }}
+        host: {{ $.Values.serviceName  }}
