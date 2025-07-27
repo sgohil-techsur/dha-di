@@ -1,0 +1,30 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Connect
+metadata:
+  name: connect
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-server-connect:7.6.0
+    init: confluentinc/confluent-init-container:2.8.0
+  build:
+    type: onDemand
+    onDemand:
+      plugins:
+        locationType: confluentHub
+        confluentHub:
+          - name: kafka-connect-jdbc
+            owner: confluentinc
+            version: 10.2.5
+          - name: debezium-connector-postgresql
+            owner: debezium
+            version: 2.5.4            
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+  mountedSecrets:
+  - secretRef: keycloak-secret
+  - secretRef: data-secret
+  - secretRef: inventory-secret
+  - secretRef: reservation-secret
+  - secretRef: userservice-secret  

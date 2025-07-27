@@ -1,0 +1,28 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Connector
+metadata:
+  name: inventory-connector-sink
+spec:
+  class: io.confluent.connect.jdbc.JdbcSinkConnector
+  configs:
+    connection.url: "${file:/mnt/secrets/data-secret/data.properties:url}&currentSchema=inventoryservice"
+    connection.password: "${file:/mnt/secrets/data-secret/data.properties:password}"
+    connection.user: "${file:/mnt/secrets/data-secret/data.properties:user}"
+    topics.regex: "^(?!.*\\.revinfo$)inventory{{ .Values.appSuffix }}\\..*\\..*"
+    auto.create: "true"
+    auto.evolve: "true"
+    insert.mode: "upsert"
+    pk.mode: "record_key"
+    pk.fields: "id"
+    delete.enabled: "false"
+    table.name.format: "inventoryservice.${topic}"
+    transforms: "extractTableName"
+    transforms.extractTableName.type: "org.apache.kafka.connect.transforms.RegexRouter"
+    transforms.extractTableName.regex: "^[^.]+\\.[^.]+\\.(.*)"
+    transforms.extractTableName.replacement: "$1"
+    value.converter: "org.apache.kafka.connect.json.JsonConverter"
+    value.converter.schemas.enable: "true"
+    key.converter: "org.apache.kafka.connect.json.JsonConverter"
+  connectClusterRef:
+    name: connect
+  taskMax: 1

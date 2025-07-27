@@ -1,0 +1,13 @@
+# pass thru values
+appSuffix: develop
+baseUrl: govdso.com
+appName: dashboard
+serviceName: grafana-service
+servicePort: 3000
+grafana:
+  matomoDataSource: 
+    name: matomo
+    uid: matomo
+  postgresDataSource:
+    name: postgresql
+    uid: postgres-data-service

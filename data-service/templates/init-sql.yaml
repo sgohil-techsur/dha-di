@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: init-sql-data
+data:
+  init.sql: |
+    \c data-service;
+    GRANT ALL ON SCHEMA public TO "data-service";
+    CREATE SCHEMA reservationservice;
+    GRANT ALL ON SCHEMA reservationservice TO "data-service";
+    CREATE SCHEMA inventoryservice;
+    GRANT ALL ON SCHEMA inventoryservice TO "data-service";
+    CREATE SCHEMA userservice;
+    GRANT ALL ON SCHEMA userservice TO "data-service";

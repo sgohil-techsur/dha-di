@@ -1,0 +1,97 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: Grafana
+metadata:
+  name: grafana
+  labels:
+    dashboards: "grafana"
+spec:
+  config:
+    log:
+      mode: "console"
+      level: "debug"
+    users:
+      default_theme: "light"
+    dashboards:
+      default_home_dashboard_path: "/var/lib/grafana/dashboards/Regional Manager Dashboards/operations-analytics.json"
+    auth:
+      disable_login_form: "false"
+    security:
+      admin_user: admin
+      admin_password: ${GF_SECURITY_ADMIN_PASSWORD}
+    auth.generic_oauth:
+      # For variables see https://grafana.com/docs/grafana/latest/setup-grafana/configure-grafana/#env-provider
+      enabled: "true"
+      name: "Keycloak SSO"
+      allow_sign_up: "true"
+      client_id: ${APP_CONFIG_KEYCLOAK_CLIENT_ID}
+      client_secret: ""
+      scopes: "openid email profile offline_access roles"
+      email_attribute_path: email
+      login_attribute_path: username
+      name_attribute_path: full_name
+      groups_attribute_path: groups
+      auth_url: "${APP_CONFIG_KEYCLOAK_URL}/protocol/openid-connect/auth"
+      token_url: "${APP_CONFIG_KEYCLOAK_URL}/protocol/openid-connect/token"
+      api_url: "${APP_CONFIG_KEYCLOAK_URL}/protocol/openid-connect/userinfo"
+      role_attribute_path: "contains(roles[*], 'admin') && 'Admin' || contains(roles[*], 'editor') && 'Editor' || 'Viewer'"
+      use_refresh_token: "true"
+    server:
+      root_url: "https://{{ $.Values.appName }}{{ if $.Values.appSuffix }}-{{ $.Values.appSuffix }}{{ end }}.{{ $.Values.baseUrl }}"
+  deployment:
+    spec:
+      template:
+        spec:
+          # The volumes for dashboards and provisioning config
+          volumes:
+            - name: dashboards
+              emptyDir: { }
+            - name: provisioning-config
+              configMap:
+                name: provisioning-config
+          initContainers:
+            # This container copies dashboard models to FOLDER path
+            - name: init-dashboards
+              image: {{ .Values.registryURL}}/data-service:9b8894d
+              command: ["python", "generate_dashboard_models.py"]
+              env:
+                - name: DASHBOARD_FOLDER
+                  value: /var/lib/grafana/dashboards
+                - name: GRAFANA_URL
+                  value: "https://{{ $.Values.appName }}{{ if $.Values.appSuffix }}-{{ $.Values.appSuffix }}{{ end }}.{{ $.Values.baseUrl }}" 
+                - name: APP_SUFFIX
+                  value: {{ .Values.appSuffix }}
+                - name: MATOMO_DATASOURCE_UID
+                  value: {{ .Values.grafana.matomoDataSource.uid }}
+                - name: POSTGRES_DATASOURCE_UID
+                  value: {{ .Values.grafana.postgresDataSource.uid }}
+                - name: MATOMO_TOKEN_AUTH
+                  valueFrom:
+                    secretKeyRef:
+                      name: matomo-secrets
+                      key: matomoTokenAuth
+              volumeMounts:
+                - mountPath: /var/lib/grafana/dashboards
+                  name: dashboards
+          containers:
+            - name: grafana
+              resources:
+                limits:
+                  cpu: 100m
+              volumeMounts:
+                - mountPath: /etc/grafana/provisioning/dashboards
+                  name: provisioning-config
+                - mountPath: /var/lib/grafana/dashboards
+                  name: dashboards
+              envFrom:
+                - configMapRef:
+                    name: ui-config
+                - configMapRef:
+                    name: env-config
+              env:
+              - name: GF_INSTALL_PLUGINS
+                value: "yesoreyeram-infinity-datasource 2.11.4,rocketcom-astrotheme-panel 1.0.6"
+              - name: GF_SECURITY_ADMIN_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: env-secrets
+                    key: intialPassword

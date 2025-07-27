@@ -1,0 +1,52 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDatasource
+metadata:
+  name: {{ .Values.grafana.postgresDataSource.name }}
+  namespace: grafana
+spec:
+  valuesFrom:
+    - targetPath: "url"
+      valueFrom:
+        secretKeyRef:
+          name: data-service-pguser-data-service
+          key: host
+    - targetPath: "url"
+      valueFrom:
+        secretKeyRef:
+          name: data-service-pguser-data-service
+          key: port              
+    - targetPath: "database"
+      valueFrom:
+        secretKeyRef:
+          name: data-service-pguser-data-service
+          key: dbname              
+    - targetPath: "user"
+      valueFrom:
+        secretKeyRef:
+          name: data-service-pguser-data-service
+          key: user            
+    - targetPath: "secureJsonData.password"
+      valueFrom:
+        secretKeyRef:
+          name: data-service-pguser-data-service
+          key: password            
+  instanceSelector:
+    matchLabels:
+      dashboards: "grafana"
+  datasource:
+    name: {{ .Values.grafana.postgresDataSource.name }}
+    type: postgres
+    uid: {{ .Values.grafana.postgresDataSource.uid }}
+    database: ${dbname}
+    url: "${host}:${port}"
+    user: ${user}
+    access: proxy
+    jsonData:
+      connMaxLifetime: 14400
+      maxIdleConns: 2
+      maxOpenConns: 0
+      postgresVersion: 1400
+      sslmode: disable
+      timescaledb: false
+    secureJsonData:
+      password: ${password}

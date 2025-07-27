@@ -1,0 +1,30 @@
+sources:
+  - name: reservationservice
+    description: "Source schema for reservationservice database."
+    tables:
+      - name: customer
+        description: "The customer table in the reservationservice schema."
+      - name: customer_address
+        description: "The customer_address table in the reservationservice schema."
+      - name: reservation
+        description: "The reservation table in the reservationservice schema."
+      - name: reservation_service
+        description: "The reservation table in the reservationservice schema."
+
+  - name: inventoryservice
+    description: "Source schema for inventoryservice database."
+    tables:
+      - name: region
+        description: "The region table in the inventoryservice schema."
+      - name: service
+        description: "The service table in the inventoryservice schema."
+      - name: site
+        description: "The site table in the inventoryservice schema."
+      - name: site_address
+        description: "The site_address table in the inventoryservice schema."
+
+  - name: userservice
+    description: "Source schema for userservice database."
+    tables:
+      - name: pr_user
+        description: "The user table in the userservice schema."

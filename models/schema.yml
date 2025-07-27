@@ -1,0 +1,373 @@
+version: 2
+
+models:
+  - name: stg_site
+    description: "Inventoryservice.site table cleaned with simple transformations"
+    columns:
+      - name: site_id
+        description: "ID of site location"
+
+      - name: created
+        description: "Creation timestamp of site location"
+
+      - name: created_by
+        description: "Entity that created site location"
+
+      - name: updated
+        description: "Timestamp of last update to site location"
+
+      - name: updated_by
+        description: "Entity that updated site location"
+
+      - name: site_name
+        description: "The name of site location"
+
+      - name: region_id
+        description: "The ID of region the site is located in"
+
+      - name: site_id_address
+        description: "ID of site address"
+
+      - name: description
+        description: "Description of site's services"
+
+      - name: start_hour
+        description: "Opening hour for the site"
+
+      - name: end_hour
+        description: "Closing hour for the site"
+
+      - name: lessons_offered
+        description: "Whether or not lessons are offered at this site"
+
+  - name: stg_reservation
+    description: "reservationservice.reservation table cleaned with simple transformations"
+    columns:
+      - name: id
+        description: "ID of reservation"
+
+      - name: created
+        description: "Creation timestamp of reservation"
+
+      - name: created_by
+        description: "Entity that created reservation"
+
+      - name: updated
+        description: "Timestamp of last update to reservation"
+
+      - name: updated_by
+        description: "Entity that updated site location"
+
+      - name: customer_id
+        description: "Id of customer"
+
+      - name: lesson_needed
+        description: "Whether lesson is needed for reservation"
+
+      - name: reservation_confirmation
+        description: "Confirmation code of reservation"
+
+      - name: reservation_status
+        description: "Whether reservation is confirmed or cancelled"
+
+      - name: site_id
+        description: "Id of site where reservation is for"
+
+      - name: waiver_date_time
+        description: "Timestamp of waiver completion"
+      - name: reservation_date
+        description: "Date of reservation"
+
+      - name: start_time
+        description: "Start time of reservation"
+
+      - name: end_time
+        description: "End time of reservation"
+
+  - name: stg_date_range
+    description: "Utility table containing dates looking back 1 year and looking forward 1 year"
+    columns:
+      - name: date
+
+  - name: int_service_details
+    description: "inventoryservice.service table cleaned with simple join for site info"
+    columns:
+      - name: id
+        description: "ID of service"
+
+      - name: site_id
+        description: "ID of site the service is for"
+
+      - name: site_name
+        description: "Name of site"
+
+      - name: service_type
+        description: "Type of service provided"
+
+      - name: service_count
+        description: "Count of services available at the site"
+
+      - name: cost
+        description: "Cost of service"
+
+      - name: description
+        description: "Description of service"
+
+  - name: int_reservation_details
+    description: "stg_reservation table joined with reservationservice.reservation_service for details"
+    columns:
+      - name: id
+        description: "ID of reservation"
+
+      - name: created
+        description: "Creation timestamp of reservation"
+
+      - name: created_by
+        description: "Entity that created reservation"
+
+      - name: updated
+        description: "Timestamp of last update to reservation"
+
+      - name: updated_by
+        description: "Entity that updated site location"
+
+      - name: customer_id
+        description: "Id of customer"
+
+      - name: customer_first_name
+        description: "First name of customer"
+
+      - name: customer_last_name
+        description: "Last name of customer"
+
+      - name: customer_email_address
+        description: "Email address of customer"
+
+      - name: customer_phone
+        description: "Phone number of customer"
+
+      - name: service_type
+        description: "Service type requested for reservation"
+
+      - name: service_count
+        description: "Count of service requested for reservation"
+
+      - name: lesson_needed
+        description: "Whether lesson is needed for reservation"
+
+      - name: reservation_confirmation
+        description: "Confirmation code of reservation"
+
+      - name: reservation_status
+        description: "Whether reservation is confirmed or cancelled"
+
+      - name: site_id
+        description: "Id of site where reservation is for"
+
+      - name: site_name
+        description: "Name of site where reservation is for"
+
+      - name: waiver_date_time
+        description: "Timestamp of waiver completion"
+      - name: reservation_date
+        description: "Date of reservation"
+
+      - name: start_time
+        description: "Start time of reservation"
+
+      - name: end_time
+        description: "End time of reservation"
+
+      - name: created_utc
+        description: "Creation timestamp of reservation adjusted to UTC"
+
+      - name: updated_utc
+        description: "Updated timestamp of reservation adjusted to UTC"
+
+      - name: waiver_date_time_utc
+        description: "Waiver completion timestamp of reservation adjusted to UTC"
+
+      - name: reservation_date_utc
+        description: "Date of reservation adjusted to UTC"
+
+      - name: start_time_utc
+        description: "Start time of reservation adjusted to UTC"
+
+      - name: end_time_utc
+        description: "End time of reservation adjusted to UTC"
+
+  - name: int_daily_services_reserved
+    description: "Count of reservations, max services reserved and count of lessons reserved aggregated by date, site and service type"
+    columns:
+      - name: reservation_date
+        description: "Date of reservation"
+
+      - name: site_id
+        description: "ID of site the service is for"
+
+      - name: site_name
+        description: "Name of site"
+
+      - name: service_type
+        description: "Type of service provided"
+
+      - name: max_services_reserved
+        description: "Max count of services reserved for site, service type"
+
+      - name: total_lessons_reserved
+        description: "Total lessons reserved"
+
+      - name: total_reservations
+        description: "Total number of reservations for site, service type"
+
+  - name: int_user_sites
+    description: "Table containing keycloak user emails and the sites they have access to in Grafana. Contains only regional managers."
+    columns:
+      - name: email_address
+        description: "Email address of employee"
+
+      - name: role
+        description: "Employee role"
+
+      - name: region_id
+        description: "ID of region employee oversees"
+
+      - name: site_id
+        description: "ID of site the employee oversees"
+
+      - name: site_name
+        description: "Name of site the employee oversees"
+
+  - name: daily_services_summary
+    description: "Table containing aggregated stats for services and reservations by reservation date."
+    columns:
+      - name: reservation_date
+        description: "Date of reservation"
+
+      - name: site_id
+        description: "Employee role"
+
+      - name: region_id
+        description: "ID of region employee oversees"
+
+      - name: site_id
+        description: "ID of site the service is for"
+
+      - name: site_name
+        description: "Name of site"
+
+      - name: service_type
+        description: "Type of service provided"
+
+      - name: service_count
+        description: "Count of services available at the site"
+
+      - name: total_reservations
+        description: "Total number of reservations for site, service type"
+
+      - name: max_services_reserved
+        description: "Max count of services reserved for site, service type"
+
+      - name: services_remaining_count
+        description: "Max count of services reserved for site subtracted from service count"
+
+      - name: total_lessons_reserved
+        description: "Total count of reservations with lessons reserved"
+
+      - name: service_utilization_rate
+        description: "Max count of reservations reserved for site divided by service count"
+
+      - name: lesson_reservation_rate
+        description: "Number of reservations with lessons reserved divided by total number of reservations"
+
+      - name: reservation_date_utc
+        description: "Date of reservation adjusted to UTC"
+
+  - name: today_reservation_details
+    description: "int_reservation_details filtered on today's date"
+    columns:
+      - name: id
+        description: "ID of reservation"
+
+      - name: created
+        description: "Creation timestamp of reservation"
+
+      - name: created_by
+        description: "Entity that created reservation"
+
+      - name: updated
+        description: "Timestamp of last update to reservation"
+
+      - name: updated_by
+        description: "Entity that updated site location"
+
+      - name: customer_id
+        description: "Id of customer"
+
+      - name: customer_first_name
+        description: "First name of customer"
+
+      - name: customer_last_name
+        description: "Last name of customer"
+
+      - name: customer_email_address
+        description: "Email address of customer"
+
+      - name: customer_phone
+        description: "Phone number of customer"
+
+      - name: service_type
+        description: "Service type requested for reservation"
+
+      - name: service_count
+        description: "Count of service requested for reservation"
+
+      - name: lesson_needed
+        description: "Whether lesson is needed for reservation"
+
+      - name: reservation_confirmation
+        description: "Confirmation code of reservation"
+
+      - name: reservation_status
+        description: "Whether reservation is confirmed or cancelled"
+
+      - name: site_id
+        description: "Id of site where reservation is for"
+
+      - name: site_name
+        description: "Name of site where reservation is for"
+
+      - name: waiver_date_time
+        description: "Timestamp of waiver completion"
+      - name: reservation_date
+        description: "Date of reservation"
+
+      - name: start_time
+        description: "Start time of reservation"
+
+      - name: end_time
+        description: "End time of reservation"
+
+      - name: created_utc
+        description: "Creation timestamp of reservation adjusted to UTC"
+
+      - name: updated_utc
+        description: "Updated timestamp of reservation adjusted to UTC"
+
+      - name: waiver_date_time_utc
+        description: "Waiver completion timestamp of reservation adjusted to UTC"
+
+      - name: reservation_date_utc
+        description: "Date of reservation adjusted to UTC"
+
+      - name: start_time_utc
+        description: "Start time of reservation adjusted to UTC"
+
+      - name: end_time_utc
+        description: "End time of reservation adjusted to UTC"
+
+      - name: reservation_start_timestamp
+        description: "Start timestamp of reservation"
+
+      - name: reservation_end_timestamp
+        description: "End timestamp of reservation"
